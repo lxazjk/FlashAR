@@ -7,14 +7,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FlashAR</title>
 
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Google+Sans:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <style>
     body {
-      font-family: 'Noto Sans', sans-serif;
+      font-family: 'Libre Baskerville', 'CMU Serif', 'Latin Modern Roman', 'Computer Modern', Georgia, 'Times New Roman', serif;
+      font-size: 16px;
+      color: #222;
     }
     .publication-title {
       font-family: 'Google Sans', sans-serif;
@@ -41,10 +44,14 @@
       padding: 2.5rem 1.5rem;
     }
     .section-title {
-      font-family: 'Google Sans', sans-serif;
+      font-family: 'Libre Baskerville', Georgia, serif;
+    }
+    .title.is-5 {
+      font-family: 'Libre Baskerville', Georgia, serif;
     }
     .content p {
-      line-height: 1.75;
+      line-height: 1.8;
+      text-rendering: optimizeLegibility;
     }
 
     .results-table {
@@ -52,6 +59,7 @@
       border-collapse: collapse;
       font-size: 0.9rem;
       margin: 1rem auto;
+      font-family: 'Libre Baskerville', Georgia, serif;
     }
     .results-table th,
     .results-table td {
@@ -94,11 +102,12 @@
     .fig-caption {
       margin-top: 0.7rem;
       font-size: 0.9rem;
-      color: #555;
+      color: #444;
       max-width: 88%;
       margin-left: auto;
       margin-right: auto;
       text-align: center;
+      font-family: 'Libre Baskerville', Georgia, serif;
     }
 
     .vis-row {
@@ -244,10 +253,10 @@
     <div class="content" style="max-width: 800px; margin: 2rem auto 0;">
       <p>
         Standard raster-scan AR models factorize image generation as strict left-to-right, top-to-bottom next-token prediction,
-        requiring <b>H&times;W</b> sequential decoding steps.
+        requiring <span class="math">H \times W</span> sequential decoding steps.
         FlashAR reformulates this into a <b>diagonal-step factorization</b>:
-        tokens on the same anti-diagonal (i.e., positions where <i>p + q = t</i>) depend only on previously decoded tokens
-        and can therefore be generated in parallel, reducing serial steps from H&times;W to <b>H+W&minus;1</b>.
+        tokens on the same anti-diagonal (i.e., positions where <span class="math">p + q = t</span>) depend only on previously decoded tokens
+        and can therefore be generated in parallel, reducing serial steps from <span class="math">H \times W</span> to <span class="math">H + W - 1</span>.
       </p>
 
       <h4 class="title is-5">(1) Intermediate Branching for Dual-head Decoding</h4>
@@ -293,7 +302,7 @@
         The entire network is unfrozen and jointly fine-tuned end-to-end.
         The backbone, horizontal head, vertical head, and gating module are jointly optimized,
         harmonizing orthogonal spatial representations for the new diagonal-parallel decoding paradigm.
-        The backbone learning rate is scaled by 0.2&times; relative to the heads to preserve pre-trained knowledge.
+        The backbone learning rate is scaled by <span class="math">0.2\times</span> relative to the heads to preserve pre-trained knowledge.
       </p>
 
       <h4 class="title is-5">(4) Hardware-Aware Inference Pipeline</h4>
@@ -453,6 +462,13 @@
     </div>
   </div>
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script>
+document.querySelectorAll('.math').forEach(function(el) {
+  katex.render(el.textContent, el, { throwOnError: false });
+});
+</script>
 
 </body>
 </html>
