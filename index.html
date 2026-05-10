@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="FlashAR: Efficient Post-Training Acceleration for Autoregressive Image Generation">
+  <meta name="keywords" content="FlashAR, Autoregressive, Image Generation, Parallel Decoding">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FlashAR</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+    }
+    .publication-title {
+      font-family: 'Google Sans', sans-serif;
+    }
+    .publication-authors {
+      font-family: 'Google Sans', sans-serif;
+    }
+    .publication-authors a {
+      color: hsl(204, 58%, 45%);
+    }
+    .publication-authors a:hover {
+      text-decoration: underline;
+    }
+    .link-block a {
+      margin: 0 4px;
+    }
+    .hero-body {
+      padding-bottom: 1.5rem;
+    }
+    .teaser .hero-body {
+      padding-top: 0;
+    }
+    .section {
+      padding: 2.5rem 1.5rem;
+    }
+    .section-title {
+      font-family: 'Google Sans', sans-serif;
+    }
+    .content p {
+      line-height: 1.75;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem auto;
+    }
+    .results-table th,
+    .results-table td {
+      padding: 6px 10px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+    .results-table thead th {
+      border-bottom: 2px solid #999;
+      font-weight: 600;
+    }
+    .results-table .group-sep td {
+      background: #f5f5f5;
+      font-weight: 600;
+      text-align: left;
+      padding-left: 14px;
+      font-size: 0.88rem;
+    }
+    .results-table .ours td {
+      background: #f0f4ff;
+    }
+    .results-table .bf {
+      font-weight: 700;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    .bibtex-box {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 1rem 1.2rem;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.55;
+    }
+
+    .fig-caption {
+      margin-top: 0.7rem;
+      font-size: 0.9rem;
+      color: #555;
+      max-width: 88%;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .vis-row {
+      margin-bottom: 1.2rem;
+    }
+    .vis-row img {
+      width: 100%;
+    }
+    .vis-row-caption {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    footer.footer {
+      padding: 1.5rem;
+      background: #fafafa;
+    }
+
+    @media (max-width: 768px) {
+      .results-table { font-size: 0.78rem; }
+      .results-table th, .results-table td { padding: 4px 5px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Title -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title">
+            FlashAR: Efficient Post-Training Acceleration<br>for Autoregressive Image Generation
+          </h1>
+
+          <div class="is-size-5 publication-authors" style="margin-top: 0.8rem;">
+            <span class="author-block"><a href="https://github.com/lxazjk">Junkang Zhou</a><sup>1*</sup>,</span>
+            <span class="author-block"><a href="https://hexy.tech/">Yefei He</a><sup>1*</sup>,</span>
+            <span class="author-block"><a href="https://github.com/Chenfeng1271">Feng Chen</a><sup>2</sup>,</span>
+            <span class="author-block">Weijie Wang<sup>1</sup>,</span>
+            <span class="author-block"><a href="https://bohanzhuang.github.io/">Bohan Zhuang</a><sup>1</sup></span>
+          </div>
+
+          <div class="is-size-6 publication-authors" style="margin-top: 0.4rem; color: #555;">
+            <span><sup>1</sup>Zhejiang University</span> &nbsp;&nbsp;
+            <span><sup>2</sup>University of Adelaide</span>
+          </div>
+          <div class="is-size-6" style="margin-top: 0.2rem; color: #888;">
+            * Equal contribution
+          </div>
+
+          <div class="column has-text-centered" style="margin-top: 1rem;">
+            <div class="link-block">
+              <a class="button is-rounded is-dark is-small" href="#">
+                <span class="icon"><i class="ai ai-arxiv"></i></span>
+                <span>arXiv</span>
+              </a>
+              <a class="button is-rounded is-dark is-small" href="https://github.com/lxazjk/LlamaGen-Flash">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>LlamaGen-Flash</span>
+              </a>
+              <a class="button is-rounded is-dark is-small" href="https://github.com/lxazjk/Emu3.5-Flash">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>Emu3.5-Flash</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Teaser -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img src="./static/images/teaser.png" alt="Generated samples from FlashAR" style="width: 100%;">
+      <p class="fig-caption">
+        <b>Figure 1. Generated samples from FlashAR.</b>
+        The first row shows 512&times;512 text-guided generation results,
+        while the second row presents class-conditional generation samples at 384&times;384 and 256&times;256 resolutions.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Abstract -->
+<section class="section" id="abstract">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title has-text-centered">Abstract</h2>
+    <div class="content has-text-justified" style="max-width: 800px; margin: 0 auto;">
+      <p>
+        Large-scale autoregressive models have demonstrated remarkable capabilities in image generation.
+        However, their sequential raster-scan decoding relies on strictly next-token prediction, making inference prohibitively expensive.
+        Existing acceleration methods typically either introduce entirely new generation paradigms that necessitate costly pre-training from scratch,
+        or enable parallel generation at the expense of a training-inference gap or altered prediction objectives.
+      </p>
+      <p>
+        In this paper, we introduce <b>FlashAR</b>, a lightweight post-training adaptation framework that efficiently adapts
+        a pre-trained raster-scan autoregressive model into a highly parallel generator based on two-way next-token prediction.
+        We retain the original AR head as a horizontal head for row-wise prediction and introduce a complementary, lightweight vertical head for column-wise prediction.
+        To facilitate efficient adaptation, we branch the vertical head from an intermediate layer rather than the final layer, bypassing the inherent horizontal head bias.
+        We further employ a learnable fusion gate to dynamically combine the two predictions at each position,
+        and propose a two-stage adaptation pipeline to reduce post-training cost.
+      </p>
+      <p>
+        Extensive experiments on LlamaGen and Emu3.5 show that FlashAR achieves up to a
+        <b>22.9&times;</b> speedup for 512&times;512 image generation through lightweight post-training with merely <b>0.05%</b> of the original training data.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Method -->
+<section class="section" id="method">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title has-text-centered">Method</h2>
+
+    <div style="text-align: center;">
+      <img src="./static/images/overview.png" alt="Overview of FlashAR" style="max-width: 100%;">
+      <p class="fig-caption">
+        <b>Figure 2. Overview of the FlashAR framework.</b>
+        Initialized from a pre-trained raster-scan autoregressive model,
+        the architecture incorporates an intermediate branching module for the vertical head and a learnable fusion gate,
+        facilitating efficient adaptation to parallel generation.
+      </p>
+    </div>
+
+    <div class="content" style="max-width: 800px; margin: 2rem auto 0;">
+      <h4 class="title is-5">(1) Intermediate Branching for Dual-head Decoding</h4>
+      <p>
+        Instead of introducing the vertical prediction branch at the final layer,
+        we branch over the intermediate layers of the decoder where features remain semantically rich
+        and less coupled to the original horizontal decoding direction.
+        The horizontal branch utilizes the original top layers for row-wise prediction,
+        while the vertical branch employs an independently trainable block for column-wise prediction.
+      </p>
+
+      <h4 class="title is-5">(2) Learnable Fusion Gate</h4>
+      <p>
+        Since horizontal and vertical predictions capture complementary dependencies whose relative importance varies across target positions,
+        we fuse the two predictions with a learnable fusion gate rather than simply averaging them.
+        This context-dependent gate dynamically balances horizontal and vertical logits at each spatial position.
+      </p>
+
+      <h4 class="title is-5">(3) Two-Stage Adaptation Pipeline</h4>
+      <p>
+        <b>Stage 1 &mdash; Branch Initialization:</b>
+        We freeze the pre-trained backbone and the original horizontal head.
+        Only the newly initialized vertical head and gating mechanism are trainable.
+      </p>
+      <p>
+        <b>Stage 2 &mdash; Joint Fine-Tuning:</b>
+        The entire network is unfrozen and jointly fine-tuned to adapt to the new two-way decoding paradigm.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Results -->
+<section class="section" id="results">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 section-title has-text-centered">Results</h2>
+
+    <h4 class="title is-5 has-text-centered" style="margin-top: 1rem;">
+      Table 1. Quantitative evaluation on the ImageNet 256&times;256 benchmark
+    </h4>
+    <div class="table-wrapper">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Model Size</th><th>Method</th><th>Type</th><th>Epoch</th>
+            <th>FID&darr;</th><th>IS&uarr;</th><th>P/R-F1&uarr;</th><th>Steps</th><th>Throughput</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group-sep"><td colspan="9">B (~120M)</td></tr>
+          <tr><td></td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>5.46</td><td>193.6</td><td>0.594</td><td>256</td><td>117.9</td></tr>
+          <tr><td></td><td>PAR</td><td>From scratch</td><td>300</td><td>6.21</td><td>204.4</td><td>0.537</td><td>67</td><td>174.1</td></tr>
+          <tr><td></td><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">4.65</td><td class="bf">212.3</td><td>0.600</td><td>31</td><td>419.7</td></tr>
+          <tr><td></td><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>5.91</td><td>176.2</td><td>0.589</td><td>64</td><td>186.3</td></tr>
+          <tr class="ours"><td></td><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>4.68</td><td>208.3</td><td class="bf">0.605</td><td>31</td><td class="bf">447.2</td></tr>
+
+          <tr class="group-sep"><td colspan="9">L (~360M)</td></tr>
+          <tr><td></td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>3.80</td><td>248.3</td><td>0.639</td><td>256</td><td>47.1</td></tr>
+          <tr><td></td><td>PAR</td><td>From scratch</td><td>300</td><td>4.32</td><td>189.4</td><td>0.576</td><td>67</td><td>93.8</td></tr>
+          <tr><td></td><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">3.06</td><td>263.9</td><td>0.641</td><td>31</td><td>195.4</td></tr>
+          <tr><td></td><td>VAR</td><td>From scratch</td><td>200</td><td>3.30</td><td>274.4</td><td>0.634</td><td>10</td><td>129.3</td></tr>
+          <tr><td></td><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>4.55</td><td>243.5</td><td>0.645</td><td>64</td><td>103.2</td></tr>
+          <tr class="ours"><td></td><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>3.16</td><td class="bf">289.0</td><td class="bf">0.656</td><td>31</td><td class="bf">224.7</td></tr>
+
+          <tr class="group-sep"><td colspan="9">XL (~700M)</td></tr>
+          <tr><td></td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>3.39</td><td>227.1</td><td>0.648</td><td>256</td><td>23.7</td></tr>
+          <tr><td></td><td>PAR</td><td>From scratch</td><td>300</td><td>3.50</td><td>234.4</td><td>0.619</td><td>67</td><td>53.9</td></tr>
+          <tr><td></td><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">2.70</td><td>277.5</td><td class="bf">0.676</td><td>31</td><td>98.1</td></tr>
+          <tr><td></td><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>4.13</td><td>258.6</td><td>0.654</td><td>64</td><td>41.7</td></tr>
+          <tr class="ours"><td></td><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>2.94</td><td class="bf">293.7</td><td>0.672</td><td>31</td><td class="bf">109.3</td></tr>
+
+          <tr class="group-sep"><td colspan="9">XXL (~1.4B)</td></tr>
+          <tr><td></td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>3.09</td><td>253.6</td><td>0.647</td><td>256</td><td>14.1</td></tr>
+          <tr><td></td><td>PAR</td><td>From scratch</td><td>300</td><td>3.20</td><td>288.3</td><td>0.632</td><td>67</td><td>33.9</td></tr>
+          <tr><td></td><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">2.58</td><td class="bf">293.5</td><td>0.673</td><td>31</td><td>56.9</td></tr>
+          <tr><td></td><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>3.78</td><td>264.9</td><td>0.652</td><td>64</td><td>26.8</td></tr>
+          <tr class="ours"><td></td><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>2.79</td><td>289.4</td><td class="bf">0.690</td><td>31</td><td class="bf">63.4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="title is-5 has-text-centered" style="margin-top: 2.5rem;">
+      Table 2. Training configurations and inference efficiency on Emu3.5-Image-34B
+    </h4>
+    <div class="table-wrapper" style="max-width: 780px; margin: 0 auto;">
+      <table class="results-table">
+        <thead>
+          <tr><th>Method</th><th>Type</th><th>Steps</th><th>Data</th><th>Latency (s)&darr;</th><th>Decoding Steps</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Emu3.5-Image</td><td>From scratch</td><td>940K</td><td>150B</td><td>130.10</td><td>1024</td></tr>
+          <tr><td>BlockDiffusion</td><td>Post-training</td><td>50K</td><td>80M</td><td>6.17</td><td>64</td></tr>
+          <tr class="ours"><td><b>FlashAR</b></td><td>Post-training</td><td>50K</td><td>80M</td><td class="bf">5.68</td><td>63</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="title is-5 has-text-centered" style="margin-top: 2.5rem;">
+      Table 3. GenEval scores on Emu3.5-Image-34B (cfg=5.0, 512&times;512)
+    </h4>
+    <div class="table-wrapper" style="max-width: 860px; margin: 0 auto;">
+      <table class="results-table">
+        <thead>
+          <tr><th>Method</th><th>Overall</th><th>Single Obj</th><th>Two Obj</th><th>Counting</th><th>Colors</th><th>Position</th><th>Color Attr</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Emu3.5-Image</td><td>80.48</td><td>100.00</td><td>94.95</td><td>53.75</td><td>90.96</td><td>73.00</td><td>70.25</td></tr>
+          <tr><td>BlockDiffusion</td><td>73.83</td><td>96.88</td><td>88.89</td><td>47.50</td><td>85.64</td><td>68.00</td><td>58.44</td></tr>
+          <tr class="ours"><td><b>FlashAR</b></td><td><b>80.29</b></td><td>98.75</td><td>91.92</td><td>53.75</td><td class="bf">92.55</td><td class="bf">80.00</td><td>64.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Visualizations -->
+<section class="section" id="visualizations">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title has-text-centered">Visualizations</h2>
+
+    <h4 class="title is-5 has-text-centered">Text-guided Image Generation (Emu3.5-FlashAR)</h4>
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+      <img src="./static/images/apendix_emu.png" alt="Text-guided generation samples" style="width: 100%;">
+    </div>
+
+    <h4 class="title is-5 has-text-centered">Class-conditional Image Generation (FlashAR-XXL, ImageNet 256&times;256)</h4>
+    <div style="max-width: 960px; margin: 0 auto;">
+      <div class="vis-row">
+        <img src="./static/images/class_id_387.png" alt="Lesser panda">
+        <div class="vis-row-caption">class 387, lesser panda</div>
+      </div>
+      <div class="vis-row">
+        <img src="./static/images/class_id_90.png" alt="Lorikeet">
+        <div class="vis-row-caption">class 90, lorikeet</div>
+      </div>
+      <div class="vis-row">
+        <img src="./static/images/class_id_250.png" alt="Siberian husky">
+        <div class="vis-row-caption">class 250, Siberian husky</div>
+      </div>
+      <div class="vis-row">
+        <img src="./static/images/class_id_933.png" alt="Cheeseburger">
+        <div class="vis-row-caption">class 933, cheeseburger</div>
+      </div>
+      <div class="vis-row">
+        <img src="./static/images/class_id_437_1.png" alt="Beacon">
+        <div class="vis-row-caption">class 437, beacon</div>
+      </div>
+      <div class="vis-row">
+        <img src="./static/images/class_id_979.png" alt="Valley">
+        <div class="vis-row-caption">class 979, valley</div>
+      </div>
+      <div class="vis-row">
+        <img src="./static/images/class_id_985.png" alt="Daisy">
+        <div class="vis-row-caption">class 985, daisy</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BibTeX -->
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title has-text-centered">BibTeX</h2>
+    <pre class="bibtex-box"><code>@article{zhou2025flashar,
+  title={FlashAR: Efficient Post-Training Acceleration for Autoregressive Image Generation},
+  author={Zhou, Junkang and He, Yefei and Chen, Feng and Wang, Weijie and Zhuang, Bohan},
+  journal={arXiv preprint},
+  year={2025}
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered" style="font-size: 0.9rem;">
+      <p>The website template is borrowed from <a href="https://nerfies.github.io">Nerfies</a>.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Arxiv source
+arxiv_content/
+_arxiv_*.zip
+*.pdf
+
+# LaTeX
+flashar.tex
+reference.bib
+*.aux
+*.log
+*.bbl
+*.blg
+*.out
+*.synctex.gz
+
+# System
+.DS_Store
+
+# Logs
+emu3.5log/
+
+# LlamaGen code
+LlamaGen/
