@@ -242,20 +242,43 @@
     </div>
 
     <div class="content" style="max-width: 800px; margin: 2rem auto 0;">
+      <p>
+        Standard raster-scan AR models factorize image generation as strict left-to-right, top-to-bottom next-token prediction,
+        requiring <b>H&times;W</b> sequential decoding steps.
+        FlashAR reformulates this into a <b>diagonal-step factorization</b>:
+        tokens on the same anti-diagonal (i.e., positions where <i>p + q = t</i>) depend only on previously decoded tokens
+        and can therefore be generated in parallel, reducing serial steps from H&times;W to <b>H+W&minus;1</b>.
+      </p>
+
       <h4 class="title is-5">(1) Intermediate Branching for Dual-head Decoding</h4>
       <p>
-        Instead of introducing the vertical prediction branch at the final layer,
-        we branch over the intermediate layers of the decoder where features remain semantically rich
-        and less coupled to the original horizontal decoding direction.
-        The horizontal branch utilizes the original top layers for row-wise prediction,
-        while the vertical branch employs an independently trainable block for column-wise prediction.
+        To realize this two-way prediction, we retain the original AR head as a <b>horizontal head</b> for row-wise prediction
+        and introduce a lightweight <b>vertical head</b> for column-wise prediction.
+        A key challenge is that the pre-trained model&rsquo;s top-layer representations are inherently biased toward the original horizontal raster-scan objective.
+        Our linear probing analysis confirms that deeper layers become increasingly specialized to horizontal prediction,
+        retaining less cross-axis information.
+        Therefore, instead of attaching the vertical head at the final layer,
+        we branch it from an <b>intermediate upper layer</b> where features remain semantically rich and less direction-specific.
+        This branching design also improves runtime efficiency:
+        the horizontal and vertical blocks execute concurrently on top of the shared trunk,
+        maintaining the original critical-path depth.
       </p>
 
       <h4 class="title is-5">(2) Learnable Fusion Gate</h4>
       <p>
-        Since horizontal and vertical predictions capture complementary dependencies whose relative importance varies across target positions,
-        we fuse the two predictions with a learnable fusion gate rather than simply averaging them.
-        This context-dependent gate dynamically balances horizontal and vertical logits at each spatial position.
+        The horizontal and vertical heads provide two complementary predictions for each image token.
+        While simple averaging (as used in NAR) assumes isotropic contribution from both directions,
+        natural images often exhibit significant anisotropy&mdash;for instance,
+        along a sharp horizontal edge, the vertical predecessor may provide more reliable structural continuity.
+        Moreover, when the two heads yield conflicting logit distributions, direct averaging acts as a low-pass filter, causing blurred textures.
+      </p>
+      <p>
+        We therefore introduce a <b>learnable fusion gate</b> that computes a context-dependent weight
+        from the two predecessor hidden states via an MLP with sigmoid activation.
+        The fused logit at each position is a weighted combination of the horizontal and vertical predictions,
+        allowing the model to adaptively exploit their complementarity.
+        For boundary positions, only the available directional prediction is used:
+        the first row uses horizontal logits, and the first column uses vertical logits.
       </p>
 
       <h4 class="title is-5">(3) Two-Stage Adaptation Pipeline</h4>
@@ -263,10 +286,25 @@
         <b>Stage 1 &mdash; Branch Initialization:</b>
         We freeze the pre-trained backbone and the original horizontal head.
         Only the newly initialized vertical head and gating mechanism are trainable.
+        This frozen-backbone strategy prevents catastrophic forgetting and ensures rapid, stable convergence for the new components.
       </p>
       <p>
         <b>Stage 2 &mdash; Joint Fine-Tuning:</b>
-        The entire network is unfrozen and jointly fine-tuned to adapt to the new two-way decoding paradigm.
+        The entire network is unfrozen and jointly fine-tuned end-to-end.
+        The backbone, horizontal head, vertical head, and gating module are jointly optimized,
+        harmonizing orthogonal spatial representations for the new diagonal-parallel decoding paradigm.
+        The backbone learning rate is scaled by 0.2&times; relative to the heads to preserve pre-trained knowledge.
+      </p>
+
+      <h4 class="title is-5">(4) Hardware-Aware Inference Pipeline</h4>
+      <p>
+        To translate theoretical parallelism into wall-clock speedups,
+        we implement a hardware-aware inference pipeline.
+        We leverage <b>FlexAttention</b> to dynamically compile sparse 2D diagonal-step masks on the fly,
+        entirely bypassing the materialization of the full attention matrix.
+        After sampling each diagonal, all tokens are appended to branch-specific KV caches in a single batched operation.
+        We similarly batch the conditional and unconditional forward passes for classifier-free guidance,
+        amortizing kernel launch overheads and maximizing GPU arithmetic intensity.
       </p>
     </div>
   </div>
