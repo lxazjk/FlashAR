@@ -53,31 +53,6 @@
       text-rendering: optimizeLegibility;
     }
 
-    /* Highlight strip */
-    .highlight-strip {
-      display: flex;
-      justify-content: center;
-      gap: 3rem;
-      flex-wrap: wrap;
-      padding: 2rem 0;
-    }
-    .highlight-strip .hl-item {
-      text-align: center;
-    }
-    .highlight-strip .hl-num {
-      font-size: 2.8rem;
-      font-weight: 700;
-      font-family: 'Google Sans', sans-serif;
-      color: #1a1a2e;
-      line-height: 1.1;
-    }
-    .highlight-strip .hl-label {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 0.2rem;
-      font-family: 'Google Sans', sans-serif;
-    }
-
     /* Tables */
     .results-table {
       width: 100%;
@@ -155,8 +130,6 @@
     @media (max-width: 768px) {
       .results-table { font-size: 0.78rem; }
       .results-table th, .results-table td { padding: 4px 5px; }
-      .highlight-strip { gap: 1.5rem; }
-      .highlight-strip .hl-num { font-size: 2rem; }
     }
   </style>
 </head>
@@ -234,31 +207,7 @@
   </div>
 </section>
 
-<!-- Key Numbers -->
-<section style="background: #f7f8fa; border-top: 1px solid #eee; border-bottom: 1px solid #eee;">
-  <div class="container is-max-desktop">
-    <div class="highlight-strip">
-      <div class="hl-item">
-        <div class="hl-num">22.9&times;</div>
-        <div class="hl-label">Wall-clock Speedup<br>512&times;512 on Emu3.5-34B</div>
-      </div>
-      <div class="hl-item">
-        <div class="hl-num">0.05%</div>
-        <div class="hl-label">of Original<br>Pre-training Data</div>
-      </div>
-      <div class="hl-item">
-        <div class="hl-num">447 img/s</div>
-        <div class="hl-label">Throughput<br>on a Single GPU</div>
-      </div>
-      <div class="hl-item">
-        <div class="hl-num">25 epochs</div>
-        <div class="hl-label">Post-training Cost<br>on ImageNet</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TL;DR + Abstract -->
+<!-- Abstract -->
 <section class="section" id="abstract">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title has-text-centered">Abstract</h2>
