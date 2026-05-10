@@ -11,11 +11,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <style>
     body {
-      font-family: 'Libre Baskerville', 'CMU Serif', 'Latin Modern Roman', 'Computer Modern', Georgia, 'Times New Roman', serif;
+      font-family: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
       font-size: 16px;
       color: #222;
     }
@@ -54,6 +53,32 @@
       text-rendering: optimizeLegibility;
     }
 
+    /* Highlight strip */
+    .highlight-strip {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+      padding: 2rem 0;
+    }
+    .highlight-strip .hl-item {
+      text-align: center;
+    }
+    .highlight-strip .hl-num {
+      font-size: 2.8rem;
+      font-weight: 700;
+      font-family: 'Google Sans', sans-serif;
+      color: #1a1a2e;
+      line-height: 1.1;
+    }
+    .highlight-strip .hl-label {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.2rem;
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    /* Tables */
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -107,7 +132,6 @@
       margin-left: auto;
       margin-right: auto;
       text-align: center;
-      font-family: 'Libre Baskerville', Georgia, serif;
     }
 
     .vis-row {
@@ -131,6 +155,8 @@
     @media (max-width: 768px) {
       .results-table { font-size: 0.78rem; }
       .results-table th, .results-table td { padding: 4px 5px; }
+      .highlight-strip { gap: 1.5rem; }
+      .highlight-strip .hl-num { font-size: 2rem; }
     }
   </style>
 </head>
@@ -200,36 +226,52 @@
     <div class="hero-body">
       <img src="./static/images/teaser.png" alt="Generated samples from FlashAR" style="width: 100%;">
       <p class="fig-caption">
-        <b>Figure 1. Generated samples from FlashAR.</b>
-        The first row shows 512&times;512 text-guided generation results,
-        while the second row presents class-conditional generation samples at 384&times;384 and 256&times;256 resolutions.
+        <b>Generated samples from FlashAR.</b>
+        The first row shows 512&times;512 text-guided generation results (Emu3.5-FlashAR),
+        while the second row presents class-conditional generation at 384&times;384 and 256&times;256 (LlamaGen-FlashAR).
       </p>
     </div>
   </div>
 </section>
 
-<!-- Abstract -->
+<!-- Key Numbers -->
+<section style="background: #f7f8fa; border-top: 1px solid #eee; border-bottom: 1px solid #eee;">
+  <div class="container is-max-desktop">
+    <div class="highlight-strip">
+      <div class="hl-item">
+        <div class="hl-num">22.9&times;</div>
+        <div class="hl-label">Wall-clock Speedup<br>512&times;512 on Emu3.5-34B</div>
+      </div>
+      <div class="hl-item">
+        <div class="hl-num">0.05%</div>
+        <div class="hl-label">of Original<br>Pre-training Data</div>
+      </div>
+      <div class="hl-item">
+        <div class="hl-num">447 img/s</div>
+        <div class="hl-label">Throughput<br>on a Single GPU</div>
+      </div>
+      <div class="hl-item">
+        <div class="hl-num">25 epochs</div>
+        <div class="hl-label">Post-training Cost<br>on ImageNet</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TL;DR + Abstract -->
 <section class="section" id="abstract">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title has-text-centered">Abstract</h2>
     <div class="content has-text-justified" style="max-width: 800px; margin: 0 auto;">
       <p>
-        Large-scale autoregressive models have demonstrated remarkable capabilities in image generation.
-        However, their sequential raster-scan decoding relies on strictly next-token prediction, making inference prohibitively expensive.
-        Existing acceleration methods typically either introduce entirely new generation paradigms that necessitate costly pre-training from scratch,
-        or enable parallel generation at the expense of a training-inference gap or altered prediction objectives.
-      </p>
-      <p>
-        In this paper, we introduce <b>FlashAR</b>, a lightweight post-training adaptation framework that efficiently adapts
-        a pre-trained raster-scan autoregressive model into a highly parallel generator based on two-way next-token prediction.
-        We retain the original AR head as a horizontal head for row-wise prediction and introduce a complementary, lightweight vertical head for column-wise prediction.
-        To facilitate efficient adaptation, we branch the vertical head from an intermediate layer rather than the final layer, bypassing the inherent horizontal head bias.
-        We further employ a learnable fusion gate to dynamically combine the two predictions at each position,
-        and propose a two-stage adaptation pipeline to reduce post-training cost.
-      </p>
-      <p>
-        Extensive experiments on LlamaGen and Emu3.5 show that FlashAR achieves up to a
-        <b>22.9&times;</b> speedup for 512&times;512 image generation through lightweight post-training with merely <b>0.05%</b> of the original training data.
+        <b>FlashAR</b> is a lightweight post-training framework that transforms a pre-trained raster-scan autoregressive model into a highly parallel generator.
+        Instead of training from scratch or altering the prediction objective,
+        FlashAR introduces a <b>vertical head</b> branched from an intermediate layer alongside the original horizontal head,
+        fused by a <b>learnable gate</b>&mdash;enabling diagonal-parallel decoding that reduces serial steps from
+        <i>H&times;W</i> to <i>H+W&minus;1</i>.
+        With only <b>0.05%</b> of the original training data,
+        FlashAR achieves up to <b>22.9&times;</b> wall-clock speedup on Emu3.5-34B at 512&times;512 resolution,
+        while preserving generation quality.
       </p>
     </div>
   </div>
@@ -243,77 +285,29 @@
     <div style="text-align: center;">
       <img src="./static/images/overview.png" alt="Overview of FlashAR" style="max-width: 85%; display: block; margin: 0 auto;">
       <p class="fig-caption">
-        <b>Figure 2. Overview of the FlashAR framework.</b>
-        Initialized from a pre-trained raster-scan autoregressive model,
-        the architecture incorporates an intermediate branching module for the vertical head and a learnable fusion gate,
-        facilitating efficient adaptation to parallel generation.
+        <b>Overview of FlashAR.</b>
+        A vertical head branches from an intermediate layer of the pre-trained AR backbone.
+        Horizontal and vertical predictions are dynamically fused via a learnable gate, enabling parallel decoding along anti-diagonals.
       </p>
     </div>
 
     <div class="content" style="max-width: 800px; margin: 2rem auto 0;">
+      <p>Three key designs make FlashAR both fast and easy to adapt:</p>
+      <ul>
+        <li><b>Intermediate Branching.</b>
+          The vertical head is attached at an upper-intermediate layer rather than the final layer,
+          where features are still semantically rich and not yet specialized to horizontal prediction.
+          Both branches run concurrently with no extra critical-path depth.</li>
+        <li><b>Learnable Fusion Gate.</b>
+          A lightweight MLP-based gate adaptively balances horizontal and vertical logits at each spatial position,
+          avoiding the blurring artifacts of naive averaging.</li>
+        <li><b>Two-Stage Adaptation.</b>
+          Stage 1 freezes the backbone to initialize the vertical head; Stage 2 jointly fine-tunes everything.
+          This keeps post-training stable and data-efficient.</li>
+      </ul>
       <p>
-        Standard raster-scan AR models factorize image generation as strict left-to-right, top-to-bottom next-token prediction,
-        requiring <span class="math">H \times W</span> sequential decoding steps.
-        FlashAR reformulates this into a <b>diagonal-step factorization</b>:
-        tokens on the same anti-diagonal (i.e., positions where <span class="math">p + q = t</span>) depend only on previously decoded tokens
-        and can therefore be generated in parallel, reducing serial steps from <span class="math">H \times W</span> to <span class="math">H + W - 1</span>.
-      </p>
-
-      <h4 class="title is-5">(1) Intermediate Branching for Dual-head Decoding</h4>
-      <p>
-        To realize this two-way prediction, we retain the original AR head as a <b>horizontal head</b> for row-wise prediction
-        and introduce a lightweight <b>vertical head</b> for column-wise prediction.
-        A key challenge is that the pre-trained model&rsquo;s top-layer representations are inherently biased toward the original horizontal raster-scan objective.
-        Our linear probing analysis confirms that deeper layers become increasingly specialized to horizontal prediction,
-        retaining less cross-axis information.
-        Therefore, instead of attaching the vertical head at the final layer,
-        we branch it from an <b>intermediate upper layer</b> where features remain semantically rich and less direction-specific.
-        This branching design also improves runtime efficiency:
-        the horizontal and vertical blocks execute concurrently on top of the shared trunk,
-        maintaining the original critical-path depth.
-      </p>
-
-      <h4 class="title is-5">(2) Learnable Fusion Gate</h4>
-      <p>
-        The horizontal and vertical heads provide two complementary predictions for each image token.
-        While simple averaging (as used in NAR) assumes isotropic contribution from both directions,
-        natural images often exhibit significant anisotropy&mdash;for instance,
-        along a sharp horizontal edge, the vertical predecessor may provide more reliable structural continuity.
-        Moreover, when the two heads yield conflicting logit distributions, direct averaging acts as a low-pass filter, causing blurred textures.
-      </p>
-      <p>
-        We therefore introduce a <b>learnable fusion gate</b> that computes a context-dependent weight
-        from the two predecessor hidden states via an MLP with sigmoid activation.
-        The fused logit at each position is a weighted combination of the horizontal and vertical predictions,
-        allowing the model to adaptively exploit their complementarity.
-        For boundary positions, only the available directional prediction is used:
-        the first row uses horizontal logits, and the first column uses vertical logits.
-      </p>
-
-      <h4 class="title is-5">(3) Two-Stage Adaptation Pipeline</h4>
-      <p>
-        <b>Stage 1 &mdash; Branch Initialization:</b>
-        We freeze the pre-trained backbone and the original horizontal head.
-        Only the newly initialized vertical head and gating mechanism are trainable.
-        This frozen-backbone strategy prevents catastrophic forgetting and ensures rapid, stable convergence for the new components.
-      </p>
-      <p>
-        <b>Stage 2 &mdash; Joint Fine-Tuning:</b>
-        The entire network is unfrozen and jointly fine-tuned end-to-end.
-        The backbone, horizontal head, vertical head, and gating module are jointly optimized,
-        harmonizing orthogonal spatial representations for the new diagonal-parallel decoding paradigm.
-        The backbone learning rate is scaled by <span class="math">0.2\times</span> relative to the heads to preserve pre-trained knowledge.
-      </p>
-
-      <h4 class="title is-5">(4) Hardware-Aware Inference Pipeline</h4>
-      <p>
-        To translate theoretical parallelism into wall-clock speedups,
-        we implement a hardware-aware inference pipeline.
-        We leverage <b>FlexAttention</b> to dynamically compile sparse 2D diagonal-step masks on the fly,
-        entirely bypassing the materialization of the full attention matrix.
-        After sampling each diagonal, all tokens are appended to branch-specific KV caches in a single batched operation.
-        We similarly batch the conditional and unconditional forward passes for classifier-free guidance,
-        amortizing kernel launch overheads and maximizing GPU arithmetic intensity.
+        At inference time, FlexAttention compiles sparse diagonal masks on-the-fly and KV caches are updated in batched operations,
+        translating the theoretical parallelism into real wall-clock gains.
       </p>
     </div>
   </div>
@@ -325,14 +319,14 @@
     <h2 class="title is-3 section-title has-text-centered">Results</h2>
 
     <h4 class="title is-5 has-text-centered" style="margin-top: 1rem;">
-      Table 1. Quantitative evaluation on the ImageNet 256&times;256 benchmark
+      ImageNet 256&times;256 Class-conditional Generation
     </h4>
     <div class="table-wrapper">
       <table class="results-table">
         <thead>
           <tr>
-            <th>Model Size</th><th>Method</th><th>Type</th><th>Epoch</th>
-            <th>FID&darr;</th><th>IS&uarr;</th><th>P/R-F1&uarr;</th><th>Steps</th><th>Throughput</th>
+            <th>Size</th><th>Method</th><th>Type</th><th>Epoch</th>
+            <th>FID&darr;</th><th>IS&uarr;</th><th>P/R-F1&uarr;</th><th>Steps</th><th>img/s</th>
           </tr>
         </thead>
         <tbody>
@@ -365,7 +359,7 @@
     </div>
 
     <h4 class="title is-5 has-text-centered" style="margin-top: 2.5rem;">
-      Table 2. Training configurations and inference efficiency on Emu3.5-Image-34B
+      Emu3.5-Image-34B &mdash; Inference Efficiency
     </h4>
     <div class="table-wrapper" style="max-width: 780px; margin: 0 auto;">
       <table class="results-table">
@@ -381,7 +375,7 @@
     </div>
 
     <h4 class="title is-5 has-text-centered" style="margin-top: 2.5rem;">
-      Table 3. GenEval scores on Emu3.5-Image-34B (cfg=5.0, 512&times;512)
+      Emu3.5-Image-34B &mdash; GenEval (512&times;512)
     </h4>
     <div class="table-wrapper" style="max-width: 860px; margin: 0 auto;">
       <table class="results-table">
@@ -408,7 +402,7 @@
       <img src="./static/images/apendix_emu.png" alt="Text-guided generation samples" style="width: 100%;">
     </div>
 
-    <h4 class="title is-5 has-text-centered">Class-conditional Image Generation (FlashAR-XXL, ImageNet 256&times;256)</h4>
+    <h4 class="title is-5 has-text-centered">Class-conditional Generation (FlashAR-XXL, ImageNet 256&times;256)</h4>
     <div style="max-width: 960px; margin: 0 auto;">
       <div class="vis-row">
         <img src="./static/images/class_id_387.png" alt="Lesser panda">
@@ -462,13 +456,6 @@
     </div>
   </div>
 </footer>
-
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script>
-document.querySelectorAll('.math').forEach(function(el) {
-  katex.render(el.textContent, el, { throwOnError: false });
-});
-</script>
 
 </body>
 </html>
