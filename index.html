@@ -63,12 +63,10 @@
       border-bottom: 2px solid #999;
       font-weight: 600;
     }
-    .results-table .group-sep td {
-      background: #f5f5f5;
+    .results-table td[rowspan] {
       font-weight: 600;
-      text-align: left;
-      padding-left: 14px;
       font-size: 0.88rem;
+      background: #fafafa;
     }
     .results-table .ours td {
       background: #f0f4ff;
@@ -137,7 +135,7 @@
       <div class="columns is-centered">
         <div class="column has-text-centered">
           <h1 class="title is-2 publication-title">
-            FlashAR: Efficient Post-Training Acceleration<br>for Autoregressive Image Generation
+            FlashAR: Efficient Post-Training Acceleration<br> for Autoregressive Image Generation
           </h1>
 
           <div class="is-size-5 publication-authors" style="margin-top: 0.8rem;">
@@ -283,34 +281,30 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="group-sep"><td colspan="9">B (~120M)</td></tr>
-          <tr><td></td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>5.46</td><td>193.6</td><td>0.594</td><td>256</td><td>117.9</td></tr>
-          <tr><td></td><td>PAR</td><td>From scratch</td><td>300</td><td>6.21</td><td>204.4</td><td>0.537</td><td>67</td><td>174.1</td></tr>
-          <tr><td></td><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">4.65</td><td class="bf">212.3</td><td>0.600</td><td>31</td><td>419.7</td></tr>
-          <tr><td></td><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>5.91</td><td>176.2</td><td>0.589</td><td>64</td><td>186.3</td></tr>
-          <tr class="ours"><td></td><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>4.68</td><td>208.3</td><td class="bf">0.605</td><td>31</td><td class="bf">447.2</td></tr>
+          <tr><td rowspan="5" style="vertical-align:middle;">B<br>(~120M)</td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>5.46</td><td>193.6</td><td>0.594</td><td>256</td><td>117.9</td></tr>
+          <tr><td>PAR</td><td>From scratch</td><td>300</td><td>6.21</td><td>204.4</td><td>0.537</td><td>67</td><td>174.1</td></tr>
+          <tr><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">4.65</td><td class="bf">212.3</td><td>0.600</td><td>31</td><td>419.7</td></tr>
+          <tr><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>5.91</td><td>176.2</td><td>0.589</td><td>64</td><td>186.3</td></tr>
+          <tr class="ours"><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>4.68</td><td>208.3</td><td class="bf">0.605</td><td>31</td><td class="bf">447.2</td></tr>
 
-          <tr class="group-sep"><td colspan="9">L (~360M)</td></tr>
-          <tr><td></td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>3.80</td><td>248.3</td><td>0.639</td><td>256</td><td>47.1</td></tr>
-          <tr><td></td><td>PAR</td><td>From scratch</td><td>300</td><td>4.32</td><td>189.4</td><td>0.576</td><td>67</td><td>93.8</td></tr>
-          <tr><td></td><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">3.06</td><td>263.9</td><td>0.641</td><td>31</td><td>195.4</td></tr>
-          <tr><td></td><td>VAR</td><td>From scratch</td><td>200</td><td>3.30</td><td>274.4</td><td>0.634</td><td>10</td><td>129.3</td></tr>
-          <tr><td></td><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>4.55</td><td>243.5</td><td>0.645</td><td>64</td><td>103.2</td></tr>
-          <tr class="ours"><td></td><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>3.16</td><td class="bf">289.0</td><td class="bf">0.656</td><td>31</td><td class="bf">224.7</td></tr>
+          <tr><td rowspan="6" style="vertical-align:middle; border-top:2px solid #ccc;">L<br>(~360M)</td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>3.80</td><td>248.3</td><td>0.639</td><td>256</td><td>47.1</td></tr>
+          <tr><td>PAR</td><td>From scratch</td><td>300</td><td>4.32</td><td>189.4</td><td>0.576</td><td>67</td><td>93.8</td></tr>
+          <tr><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">3.06</td><td>263.9</td><td>0.641</td><td>31</td><td>195.4</td></tr>
+          <tr><td>VAR</td><td>From scratch</td><td>200</td><td>3.30</td><td>274.4</td><td>0.634</td><td>10</td><td>129.3</td></tr>
+          <tr><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>4.55</td><td>243.5</td><td>0.645</td><td>64</td><td>103.2</td></tr>
+          <tr class="ours"><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>3.16</td><td class="bf">289.0</td><td class="bf">0.656</td><td>31</td><td class="bf">224.7</td></tr>
 
-          <tr class="group-sep"><td colspan="9">XL (~700M)</td></tr>
-          <tr><td></td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>3.39</td><td>227.1</td><td>0.648</td><td>256</td><td>23.7</td></tr>
-          <tr><td></td><td>PAR</td><td>From scratch</td><td>300</td><td>3.50</td><td>234.4</td><td>0.619</td><td>67</td><td>53.9</td></tr>
-          <tr><td></td><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">2.70</td><td>277.5</td><td class="bf">0.676</td><td>31</td><td>98.1</td></tr>
-          <tr><td></td><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>4.13</td><td>258.6</td><td>0.654</td><td>64</td><td>41.7</td></tr>
-          <tr class="ours"><td></td><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>2.94</td><td class="bf">293.7</td><td>0.672</td><td>31</td><td class="bf">109.3</td></tr>
+          <tr><td rowspan="5" style="vertical-align:middle; border-top:2px solid #ccc;">XL<br>(~700M)</td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>3.39</td><td>227.1</td><td>0.648</td><td>256</td><td>23.7</td></tr>
+          <tr><td>PAR</td><td>From scratch</td><td>300</td><td>3.50</td><td>234.4</td><td>0.619</td><td>67</td><td>53.9</td></tr>
+          <tr><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">2.70</td><td>277.5</td><td class="bf">0.676</td><td>31</td><td>98.1</td></tr>
+          <tr><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>4.13</td><td>258.6</td><td>0.654</td><td>64</td><td>41.7</td></tr>
+          <tr class="ours"><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>2.94</td><td class="bf">293.7</td><td>0.672</td><td>31</td><td class="bf">109.3</td></tr>
 
-          <tr class="group-sep"><td colspan="9">XXL (~1.4B)</td></tr>
-          <tr><td></td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>3.09</td><td>253.6</td><td>0.647</td><td>256</td><td>14.1</td></tr>
-          <tr><td></td><td>PAR</td><td>From scratch</td><td>300</td><td>3.20</td><td>288.3</td><td>0.632</td><td>67</td><td>33.9</td></tr>
-          <tr><td></td><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">2.58</td><td class="bf">293.5</td><td>0.673</td><td>31</td><td>56.9</td></tr>
-          <tr><td></td><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>3.78</td><td>264.9</td><td>0.652</td><td>64</td><td>26.8</td></tr>
-          <tr class="ours"><td></td><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>2.79</td><td>289.4</td><td class="bf">0.690</td><td>31</td><td class="bf">63.4</td></tr>
+          <tr><td rowspan="5" style="vertical-align:middle; border-top:2px solid #ccc;">XXL<br>(~1.4B)</td><td>LlamaGen</td><td>From scratch</td><td>300</td><td>3.09</td><td>253.6</td><td>0.647</td><td>256</td><td>14.1</td></tr>
+          <tr><td>PAR</td><td>From scratch</td><td>300</td><td>3.20</td><td>288.3</td><td>0.632</td><td>67</td><td>33.9</td></tr>
+          <tr><td>NAR</td><td>From scratch</td><td>300</td><td class="bf">2.58</td><td class="bf">293.5</td><td>0.673</td><td>31</td><td>56.9</td></tr>
+          <tr><td>BlockDiffusion</td><td>Post-training</td><td>75</td><td>3.78</td><td>264.9</td><td>0.652</td><td>64</td><td>26.8</td></tr>
+          <tr class="ours"><td><b>FlashAR</b></td><td>Post-training</td><td><b>25</b></td><td>2.79</td><td>289.4</td><td class="bf">0.690</td><td>31</td><td class="bf">63.4</td></tr>
         </tbody>
       </table>
     </div>
