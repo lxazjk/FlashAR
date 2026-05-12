@@ -127,6 +127,39 @@
       background: #fafafa;
     }
 
+    .highlights {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      padding: 1.8rem 0 0.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .highlights .hl-item {
+      text-align: center;
+    }
+    .highlights .hl-num {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #1a3c7a;
+      line-height: 1.1;
+    }
+    .highlights .hl-unit {
+      font-size: 1.4rem;
+      font-weight: 400;
+    }
+    .highlights .hl-desc {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.3rem;
+      font-family: 'Google Sans', sans-serif;
+    }
+    @media (max-width: 600px) {
+      .highlights { gap: 1.5rem; }
+      .highlights .hl-num { font-size: 1.8rem; }
+    }
+
     @media (max-width: 768px) {
       .results-table { font-size: 0.78rem; }
       .results-table th, .results-table td { padding: 4px 5px; }
@@ -206,6 +239,22 @@
     </div>
   </div>
 </section>
+
+<!-- Highlights -->
+<div class="highlights">
+  <div class="hl-item">
+    <div class="hl-num">22.9<span class="hl-unit">&times;</span></div>
+    <div class="hl-desc">Wall-clock Speedup</div>
+  </div>
+  <div class="hl-item">
+    <div class="hl-num">80<span class="hl-unit">K</span></div>
+    <div class="hl-desc">Training Images</div>
+  </div>
+  <div class="hl-item">
+    <div class="hl-num">0.29<span class="hl-unit">s</span></div>
+    <div class="hl-desc">Latency per Image</div>
+  </div>
+</div>
 
 <!-- Abstract -->
 <section class="section" id="abstract">
